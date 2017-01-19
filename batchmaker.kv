@@ -1,0 +1,143 @@
+#:kivy 1.9.1
+
+<BMLabel@Label>:
+    outline_width: 3
+    font_size: 45
+        
+<TempLabel@Label>:     
+    font_size: 30
+        
+<Batchmaker>:
+    canvas:
+        Color:
+            rgb:0,0,1
+        BorderImage:
+            pos:self.pos
+            size:self.size
+            border: 10, 10, 10, 10
+            source:'rounded_corners.png'
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+           
+<BatchmakerDisplay>:   
+    canvas.before:
+        Color:
+            rgb: 0, 0, 0
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    padding: 20
+    spacing: 20
+            
+    cols: 3
+    
+    m601: m60_1
+    m602: m60_2
+    m603: m60_3
+    m604: m60_4
+    m281: m28_1
+    m282: m28_2
+    m283: m28_3
+    m91: m9_1
+    m92: m9_2    
+    
+    Batchmaker:           
+        id: m60_1 
+        probe:1
+        BMLabel:
+            text:"M60-1"
+            color: root.m601.colour
+         
+            
+        TempLabel:
+            text: str(root.m601.temp)    
+            color: root.m601.colour
+            
+    Batchmaker:           
+        id: m60_2
+        probe:2
+        BMLabel:
+            text:"M60-2"
+            color: root.m602.colour
+        
+        TempLabel:
+            text: str(root.m602.temp)  
+            color: root.m602.colour
+        
+    Batchmaker:           
+        id: m60_3 
+        probe:3
+        BMLabel:
+            text:"M60-3"
+            color: root.m603.colour
+        
+        TempLabel:
+            text: str(root.m603.temp)  
+            color: root.m603.colour
+        
+    Batchmaker:           
+        id: m60_4 
+        probe:4
+        BMLabel:
+            text:"M60-4"
+            color: root.m604.colour
+        
+        TempLabel:
+            text: str(root.m604.temp) 
+            color: root.m604.colour            
+          
+    Batchmaker:           
+        id: m28_1 
+        probe:5
+        BMLabel:
+            text:"M28-1"
+            color: root.m281.colour
+        
+        TempLabel:
+            text: str(root.m281.temp) 
+            color: root.m281.colour
+     
+    Batchmaker:           
+        id: m28_2
+        probe:6
+        BMLabel:
+            text:"M28-2"
+            color: root.m282.colour
+        
+        TempLabel:
+            text: str(root.m282.temp)  
+            color: root.m282.colour
+        
+    Batchmaker:           
+        id: m28_3 
+        probe:7
+        BMLabel:
+            text:"M28-3"
+            color: root.m283.colour
+        
+        TempLabel:
+            text: str(root.m283.temp)  
+            color: root.m283.colour
+        
+    Batchmaker:           
+        id: m9_1        
+        probe:8
+        BMLabel:
+            text:"M9-1"
+            color: root.m91.colour
+        
+        TempLabel:
+            text: str(root.m91.temp) 
+            color: root.m91.colour
+            
+    Batchmaker:           
+        id: m9_2        
+        probe:9
+        BMLabel:
+            text:"M9-2"
+            color: root.m92.colour
+        
+        TempLabel:
+            text: str(root.m92.temp)  
+            color: root.m92.colour

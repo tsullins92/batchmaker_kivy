@@ -1,23 +1,32 @@
 #:kivy 1.9.1
 
 <BMLabel@Label>:
+    text_size: self.size            #tells box containing text to be as big as the label containing it
+    valign: 'top'
+    halign: 'left'
+    size_hint_y: 0.75
     outline_width: 3
-    font_size: 45
+    font_size: 25
         
-<TempLabel@Label>:     
-    font_size: 30
+<TempLabel@Label>:
+    font_name: 'Roboto-Regular.ttf'
+    text_size: root.size
+    halign: 'center'
+    valign: 'top'
+    pos:self.pos
+    font_size: 45
+
         
 <Batchmaker>:
     canvas:
         Color:
-            rgb:0,0,1
         BorderImage:
             pos:self.pos
             size:self.size
-            border: 10, 10, 10, 10
-            source:'rounded_corners.png'
+            border: 1, 1, 1, 1
+            source:'batchmaker_square.png'
     orientation: 'vertical'
-    padding: 20
+    padding: 10
     spacing: 10
            
 <BatchmakerDisplay>:   
@@ -27,8 +36,8 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    padding: 20
-    spacing: 20
+    padding: 10
+    spacing: 10
             
     cols: 3
     

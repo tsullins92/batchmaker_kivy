@@ -1,0 +1,121 @@
+#:kivy 1.9.1
+
+<Batchmaker>
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+    
+    
+    
+<Label1@Label>
+    font_size: 10 
+    
+        
+<Label2@Label>
+    font_size: 10  
+      
+    
+            
+<BatchmakerDisplay>:    
+    cols: 3
+    
+    
+    m601: m60_1
+    m602: m60_2
+    m603: m60_3
+    m604: m60_4
+    m281: m28_1
+    m282: m28_2
+    m283: m28_3
+    m91: m9_1
+    m92: m9_2    
+    
+    Batchmaker:           
+        id: m60_1 
+        
+        Label1:
+            text:str(root.m601.name)
+            colour:root.m601.color
+        
+        Label2:
+            text: str(root.m601.temp)    
+     
+    Batchmaker:           
+        id: m60_2
+        
+        Label1:
+            text:str(root.m602.name)
+            colour:root.m602.color
+        
+        Label2:
+            text: str(root.m602.temp)  
+        
+    Batchmaker:           
+        id: m60_3 
+        
+        Label1:
+            text:str(root.m603.name)
+            colour:root.m603.color
+        
+        Label2:
+            text: str(root.m603.temp)  
+        
+    Batchmaker:           
+        id: m60_4 
+          
+        Label1:
+            text:str(root.m604.name)
+            colour:root.m604.color
+        
+        Label2:
+            text: str(root.m604.temp)  
+          
+    Batchmaker:           
+        id: m28_1 
+     
+        Label1:
+            text:str(root.m281.name)
+            colour:root.m281.color
+        
+        Label2:
+            text: str(root.m281.temp)  
+     
+    Batchmaker:           
+        id: m28_2
+        
+        Label1:
+            text:str(root.m282.name)
+            colour:root.m282.color
+        
+        Label2:
+            text: str(root.m282.temp)  
+        
+    Batchmaker:           
+        id: m28_3 
+        
+        Label1:
+            text:str(root.m283.name)
+            colour:root.m283.color
+        
+        Label2:
+            text: str(root.m283.temp)  
+        
+    Batchmaker:           
+        id: m9_1        
+            
+        Label1:
+            text:str(root.m91.name)
+            colour:root.m91.color
+        
+        Label2:
+            text: str(root.m91.temp)     
+            
+    Batchmaker:           
+        id: m9_2        
+        
+        Label1:
+            text:str(root.m92.name)
+            colour:root.m92.color
+        
+        Label2:
+            text: str(root.m92.temp)  

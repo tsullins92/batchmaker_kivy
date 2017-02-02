@@ -19,6 +19,9 @@ import kivy.core
 import json
 import serial
 import time
+from datetime import datetime
+import pymysql.cursors
+
 
 #Class representing each batchmaker. update_colors() is called for each batchmaker during BatchmakerDisplay().update()
 class Batchmaker(BoxLayout,Widget):
@@ -49,8 +52,7 @@ class Batchmaker(BoxLayout,Widget):
         
 
 #primary class of the app. initializes the Batchmaker() objects and updates their temperatures.
-class BatchmakerDisplay(GridLayout,Widget):  
-
+class BatchmakerDisplay(GridLayout,Widget):
     m601 = ObjectProperty(None)
     m602 = ObjectProperty(None)
     m603 = ObjectProperty(None)
@@ -60,9 +62,11 @@ class BatchmakerDisplay(GridLayout,Widget):
     m283 = ObjectProperty(None)
     m91 = ObjectProperty(None)
     m92 = ObjectProperty(None)
+    batchmakerids = ['m601','m602','m603','m604','m281','m282','m283','m91','m92']
     batchtemps = [0.0] * 9
     probenum = 0
     temperature = 0.0
+    datetimes = [datetime.now()] * 9
 
     def update(self,dt):
         self.iteration = 0
@@ -75,6 +79,7 @@ class BatchmakerDisplay(GridLayout,Widget):
                     self.probenum=int(self.msg[i+2])
                     self.temperature=float(self.msg[(i+5):(i+10)])
                     self.batchtemps[self.probenum-1]=self.temperature
+                    self.datetimes[self.probenum-1]=datetime.now()
                 i=i+1
         except:
             pass
@@ -82,12 +87,25 @@ class BatchmakerDisplay(GridLayout,Widget):
             child.temp = self.batchtemps[int(child.probe)-1]
             child.update_colors()
 
+    def upload_data(self,dt):
+        connection = pymysql.connect(host='localhost', user='tim', password='Skipper254?', database='batchtemps', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+        try:
+            with connection.cursor() as cursor:
+                i=0
+                # Create a new record
+                while i<9:
+                    cursor.execute("INSERT INTO data (batchmaker,temp,date_time) VALUES (%s, %s, %s)",(self.batchmakerids[i], self.batchtemps[i],self.datetimes[i]))
+                    connection.commit()
+                    i=i+1
+        finally:
+            connection.close()
+
     def __init__(self, *args, **kwargs):
         super(BatchmakerDisplay, self).__init__(*args, **kwargs)
         self.ser = serial.Serial('COM9', baudrate=230400, timeout=0)
         time.sleep(3)
         Clock.schedule_interval(self.update, 1)
- 
+        Clock.schedule_interval(self.upload_data,10)
 
 class BatchmakerApp(App):
     def build(self):

@@ -105,7 +105,7 @@ class BatchmakerDisplay(GridLayout,Widget):
         self.ser = serial.Serial('COM9', baudrate=230400, timeout=0)
         time.sleep(3)
         Clock.schedule_interval(self.update, 1)
-        Clock.schedule_interval(self.upload_data,10)
+        Clock.schedule_interval(self.upload_data,60)
 
 class BatchmakerApp(App):
     def build(self):

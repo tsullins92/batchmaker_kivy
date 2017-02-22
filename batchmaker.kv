@@ -4,17 +4,27 @@
     text_size: self.size            #tells box containing text to be as big as the label containing it
     valign: 'top'
     halign: 'left'
-    size_hint_y: 0.75
     outline_width: 3
     font_size: 25
+    size_hint_y:0.25
         
 <TempLabel@Label>:
     font_name: 'Roboto-Regular.ttf'
-    text_size: root.size
+    text_size: self.size
     halign: 'center'
-    valign: 'top'
+    valign: 'bottom'
+    size_hint_y: 0.37
     pos:self.pos
     font_size: 45
+
+<StatusLabel@Label>:
+    font_name: 'Roboto-Regular.ttf'
+    text_size: self.size
+    halign: 'center'
+    valign: 'top'
+    size_hint_y: 0.37
+    pos:self.pos
+    font_size: 25
 
         
 <Batchmaker>:
@@ -57,12 +67,15 @@
         BMLabel:
             text:"M60-1"
             color: root.m601.colour
-         
-            
+
         TempLabel:
-            text: str(root.m601.temp)    
+            text: str(root.m601.temp)
             color: root.m601.colour
-            
+
+        StatusLabel:
+            text: str(root.m601.status)
+            color: root.m601.colour
+
     Batchmaker:           
         id: m60_2
         probe:2
@@ -71,7 +84,11 @@
             color: root.m602.colour
         
         TempLabel:
-            text: str(root.m602.temp)  
+            text: str(root.m602.temp)
+            color: root.m602.colour
+
+        StatusLabel:
+            text: str(root.m602.status)
             color: root.m602.colour
         
     Batchmaker:           
@@ -84,7 +101,11 @@
         TempLabel:
             text: str(root.m603.temp)  
             color: root.m603.colour
-        
+
+        StatusLabel:
+            text: str(root.m603.status)
+            color: root.m603.colour
+
     Batchmaker:           
         id: m60_4 
         probe:4
@@ -95,7 +116,11 @@
         TempLabel:
             text: str(root.m604.temp) 
             color: root.m604.colour            
-          
+
+        StatusLabel:
+            text: str(root.m604.status)
+            color: root.m604.colour
+
     Batchmaker:           
         id: m28_1 
         probe:5
@@ -106,7 +131,11 @@
         TempLabel:
             text: str(root.m281.temp) 
             color: root.m281.colour
-     
+
+        StatusLabel:
+            text: str(root.m281.status)
+            color: root.m281.colour
+
     Batchmaker:           
         id: m28_2
         probe:6
@@ -116,6 +145,10 @@
         
         TempLabel:
             text: str(root.m282.temp)  
+            color: root.m282.colour
+
+        StatusLabel:
+            text: str(root.m282.status)
             color: root.m282.colour
         
     Batchmaker:           
@@ -128,7 +161,11 @@
         TempLabel:
             text: str(root.m283.temp)  
             color: root.m283.colour
-        
+
+        StatusLabel:
+            text: str(root.m283.status)
+            color: root.m283.colour
+
     Batchmaker:           
         id: m9_1        
         probe:8
@@ -139,7 +176,11 @@
         TempLabel:
             text: str(root.m91.temp) 
             color: root.m91.colour
-            
+
+        StatusLabel:
+            text: str(root.m91.status)
+            color: root.m91.colour
+
     Batchmaker:           
         id: m9_2        
         probe:9
@@ -149,4 +190,8 @@
         
         TempLabel:
             text: str(root.m92.temp)  
+            color: root.m92.colour
+
+        StatusLabel:
+            text: str(root.m92.status)
             color: root.m92.colour

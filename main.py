@@ -26,10 +26,50 @@ import pymysql.cursors
 #Class representing each batchmaker. update_colors() is called for each batchmaker during BatchmakerDisplay().update()
 class Batchmaker(BoxLayout,Widget):
     probe = NumericProperty(0)
+    init_temp = NumericProperty(0)
     temp = NumericProperty(0)
+    temp_adjust = [0,3,5,6,7,8,10,11]        #array for adjusting the read temperatures according to what the batchmaker displays
     name = StringProperty('')
     colour = ListProperty([3])
-            
+    status = StringProperty('Idle')
+    timer = NumericProperty(0)
+    past_temp = NumericProperty(0)
+
+
+    def modify_temps(self):
+        if self.init_temp <= 30:
+            self.temp = self.init_temp + self.temp_adjust[0]
+        elif self.init_temp <= 40:
+            self.temp = self.init_temp + self.temp_adjust[1]
+        elif self.init_temp <= 50:
+            self.temp = self.init_temp + self.temp_adjust[2]
+        elif self.init_temp <=60:
+            self.temp = self.init_temp + self.temp_adjust[3]
+        elif self.init_temp <=70:
+            self.temp = self.init_temp + self.temp_adjust[4]
+        elif self.init_temp <=90:
+            self.temp = self.init_temp + self.temp_adjust[5]
+        elif self.init_temp <=100:
+            self.temp = self.init_temp + self.temp_adjust[6]
+        else:
+            self.temp = self.init_temp + self.temp_adjust[7]
+
+    def update_status(self):
+        if self.past_temp == 0:
+            self.past_temp = self.temp
+        if self.timer >= 180:
+            self.timer = 0
+            if abs(self.temp - 121) <=5:
+                self.status = "sterilizing"
+            elif abs(self.temp - self.past_temp) <= 1:
+                self.status = "Idle"
+            elif self.temp - self.past_temp > 1:
+                self.status = "Heating"
+            elif self.temp - self.past_temp < -1:
+                self.status = "Cooling"
+            self.past_temp = self.temp
+        self.timer += 8
+
     def update_colors(self):
         self.colour=[0.161,1,1,1]
         if self.temp  <= 40:
@@ -83,9 +123,13 @@ class BatchmakerDisplay(GridLayout,Widget):
                 i=i+1
         except:
             pass
+        #print self.batchtemps
         for child in self.children: 
-            child.temp = self.batchtemps[int(child.probe)-1]
+            child.init_temp = self.batchtemps[int(child.probe)-1]
+            child.modify_temps()
+            child.update_status()
             child.update_colors()
+
 
     def upload_data(self,dt):
         connection = pymysql.connect(host='localhost', user='tim', password='Skipper254?', database='batchtemps', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
@@ -102,9 +146,9 @@ class BatchmakerDisplay(GridLayout,Widget):
 
     def __init__(self, *args, **kwargs):
         super(BatchmakerDisplay, self).__init__(*args, **kwargs)
-        self.ser = serial.Serial('COM9', baudrate=230400, timeout=0)
+        self.ser = serial.Serial('COM7', baudrate=9600, timeout=0)
         time.sleep(3)
-        Clock.schedule_interval(self.update, 1)
+        Clock.schedule_interval(self.update, 8)
         Clock.schedule_interval(self.upload_data,60)
 
 class BatchmakerApp(App):

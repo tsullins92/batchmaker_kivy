@@ -57,25 +57,27 @@ class Batchmaker(BoxLayout,Widget):
     def update_status(self):
         if self.past_temp == 0:
             self.past_temp = self.temp
-        if self.timer >= 180:
+        if self.timer >= 120:
             self.timer = 0
-            if abs(self.temp - 121) <=5:
-                self.status = "sterilizing"
-            elif abs(self.temp - self.past_temp) <= 1:
-                self.status = "Idle"
-            elif self.temp - self.past_temp > 1:
-                self.status = "Heating"
-            elif self.temp - self.past_temp < -1:
-                self.status = "Cooling"
-            self.past_temp = self.temp
-        self.timer += 8
+        if (abs(self.temp - 52) <= 5) & (abs(self.past_temp - 52) <= 5):
+            self.status = "Dispensing"
+        elif abs(self.temp - 121) <=5:
+            self.status = "Sterilizing"
+        elif abs(self.temp - self.past_temp) <= 1:
+            self.status = "Idle"
+        elif self.temp - self.past_temp > 1:
+            self.status = "Heating"
+        elif self.temp - self.past_temp < -1:
+            self.status = "Cooling"
+        self.past_temp = self.temp
+        self.timer += 2
 
     def update_colors(self):
         self.colour=[0.161,1,1,1]
         if self.temp  <= 40:
             self.colour=[0,1,0,1]
         elif self.temp  <= 48:
-            self.colour=[0.823,1,0.302,1]   
+            self.colour=[0.823,1,0.302,1]
         elif self.temp  <= 55:
             self.colour=[1,1,0,1]
         elif self.temp  <= 70:
@@ -84,12 +86,12 @@ class Batchmaker(BoxLayout,Widget):
             self.colour=[1,0.38,0,1]
         elif self.temp  <= 105:
             self.colour=[1,0.28,0,1]
-        else: 
+        else:
             self.colour=[1,0,0,1]
-            
+
     def __init__(self, *args, **kwargs):
-        super(Batchmaker, self).__init__(*args, **kwargs)    
-        
+        super(Batchmaker, self).__init__(*args, **kwargs)
+
 
 #primary class of the app. initializes the Batchmaker() objects and updates their temperatures.
 class BatchmakerDisplay(GridLayout,Widget):
@@ -107,32 +109,36 @@ class BatchmakerDisplay(GridLayout,Widget):
     probenum = 0
     temperature = 0.0
     datetimes = [datetime.now()] * 9
+    msg = ""
 
     def update(self,dt):
-        self.iteration = 0
         self.msg = ""
-        self.msg=self.ser.read(1000)
+        self.msg=self.ser.read(100)
+        self.f.write(self.msg)
         try:
             i=0
             while i <= (len(self.msg) - 10):
                 if self.msg[i] == 'e':
                     self.probenum=int(self.msg[i+2])
-                    self.temperature=float(self.msg[(i+5):(i+10)])
+                    self.temperature=float(self.msg[(i+5):(i+9)])
                     self.batchtemps[self.probenum-1]=self.temperature
                     self.datetimes[self.probenum-1]=datetime.now()
                 i=i+1
+            self.f.write(self.batchtemps)
         except:
             pass
-        #print self.batchtemps
-        for child in self.children: 
+        print("batchtemps: ",self.batchtemps)
+        for child in self.children:
+            self.f.write(self.batchtemps[int(child.probe)-1])
             child.init_temp = self.batchtemps[int(child.probe)-1]
             child.modify_temps()
             child.update_status()
             child.update_colors()
+        Clock.schedule_once(self.update,1)
 
 
     def upload_data(self,dt):
-        connection = pymysql.connect(host='localhost', user='tim', password='Skipper254?', database='batchtemps', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+        connection = pymysql.connect(host='localhost', user='root', password='Skipper254?', database='batchtemps', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
         try:
             with connection.cursor() as cursor:
                 i=0
@@ -146,10 +152,12 @@ class BatchmakerDisplay(GridLayout,Widget):
 
     def __init__(self, *args, **kwargs):
         super(BatchmakerDisplay, self).__init__(*args, **kwargs)
-        self.ser = serial.Serial('COM7', baudrate=9600, timeout=0)
+        self.ser = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=0)
+        self.f = open("log.txt", 'w')
         time.sleep(3)
-        Clock.schedule_interval(self.update, 8)
-        Clock.schedule_interval(self.upload_data,60)
+        Clock.schedule_once(self.update,1)
+#        Clock.schedule_interval(self.update,30)
+#        Clock.schedule_interval(self.upload_data,60)
 
 class BatchmakerApp(App):
     def build(self):

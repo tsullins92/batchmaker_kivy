@@ -2,7 +2,6 @@
 #sub-classing the App class
 #implementing its build() method so it returns a Widget instance (the root of your widget tree)
 #instantiating this class, and calling its run() method.
-#Here is an example of a minimal application://
 
 from kivy.config import Config
 Config.set('graphics','fullscreen','auto')
@@ -28,50 +27,82 @@ class Batchmaker(BoxLayout,Widget):
     probe = NumericProperty(0)
     init_temp = NumericProperty(0)
     temp = NumericProperty(0)
-    temp_adjust = [0,3,5,6,7,9,12,15]        #array for adjusting the read temperatures according to what the batchmaker displays
+    temp_adjust = [0.0,2.0,4.5,5.0,6.0,8.0,11.0,12.0]        #array for adjusting the read temperatures according to what the batchmaker displays
+    m9_temp_adjust = [0.0,9.0,10.0,11.0,12.0,15.0,19.0,24.0]
     name = StringProperty('')
     colour = ListProperty([3])
-    status = StringProperty('Idle')
+    status = StringProperty('Dispensing')
     timer = NumericProperty(0)
     past_temp = NumericProperty(0)
-
+    oldest_temp = NumericProperty(0)
+    past_status = StringProperty('Cooling')
 
     def modify_temps(self):
-        if self.init_temp <= 30:
-            self.temp = self.init_temp + self.temp_adjust[0]
-        elif self.init_temp <= 40:
-            self.temp = self.init_temp + self.temp_adjust[1]
-        elif self.init_temp <= 50:
-            self.temp = self.init_temp + self.temp_adjust[2]
-        elif self.init_temp <=60:
-            self.temp = self.init_temp + self.temp_adjust[3]
-        elif self.init_temp <=70:
-            self.temp = self.init_temp + self.temp_adjust[4]
-        elif self.init_temp <=90:
-            self.temp = self.init_temp + self.temp_adjust[5]
-        elif self.init_temp <=100:
-            self.temp = self.init_temp + self.temp_adjust[6]
+
+        if (self.probe == 8) or (self.probe == 9):
+            if self.init_temp <= 30:
+                self.temp = self.init_temp + self.m9_temp_adjust[0]
+            elif self.init_temp <= 40:
+                self.temp = self.init_temp + self.m9_temp_adjust[1]
+            elif self.init_temp <= 50:
+                self.temp = self.init_temp + self.m9_temp_adjust[2]
+            elif self.init_temp <=60:
+                self.temp = self.init_temp + self.m9_temp_adjust[3]
+            elif self.init_temp <=70:
+                self.temp = self.init_temp + self.m9_temp_adjust[4]
+            elif self.init_temp <=90:
+                self.temp = self.init_temp + self.m9_temp_adjust[5]
+            elif self.init_temp <=100:
+                self.temp = self.init_temp + self.m9_temp_adjust[6]
+            else:
+                self.temp = self.init_temp + self.m9_temp_adjust[7]
+
         else:
-            self.temp = self.init_temp + self.temp_adjust[7]
+            if self.init_temp <= 30:
+                self.temp = self.init_temp + self.temp_adjust[0]
+            elif self.init_temp <= 40:
+                self.temp = self.init_temp + self.temp_adjust[1]
+            elif self.init_temp <= 50:
+                self.temp = self.init_temp + self.temp_adjust[2]
+            elif self.init_temp <=60:
+                self.temp = self.init_temp + self.temp_adjust[3]
+            elif self.init_temp <=70:
+                self.temp = self.init_temp + self.temp_adjust[4]
+            elif self.init_temp <=90:
+                self.temp = self.init_temp + self.temp_adjust[5]
+            elif self.init_temp <=100:
+                self.temp = self.init_temp + self.temp_adjust[6]
+            else:
+                self.temp = self.init_temp + self.temp_adjust[7]
 
     def update_status(self):
         if self.past_temp == 0:
             self.past_temp = self.temp
-        if self.timer >= 120:
+        if self.timer >= 60:
             self.timer = 0
-            if (abs(self.temp - 52) <= 3) & (abs(self.past_temp - 52) <= 3):
+            if (abs(self.temp - 52) <= 2) & (abs(self.past_temp - 52) <= 2) & ((self.past_status == 'Cooling') or (self.status == 'Dispensing')):
+                self.past_status = self.status
                 self.status = "Dispensing"
-            elif (abs(self.temp - 68) <= 3) & (abs(self.past_temp - 68) <= 3):
+            elif (abs(self.temp - 42) <= 2) & (abs(self.past_temp - 42) <= 2) & ((self.past_status == 'Cooling') or (self.status == 'Dispensing')):
+                self.past_status = self.status
+                self.status = "Dispensing"
+            elif (abs(self.temp - 68) <= 2) & (abs(self.past_temp - 68) <= 2) & ((self.past_status == 'Cooling') or (self.status == 'Base Addition')):
+                self.past_status = self.status
                 self.status = "Base Addition"
             elif abs(self.temp - 121) <=5:
+                self.past_status = self.status
                 self.status = "Sterilizing"
-            elif abs(self.temp - self.past_temp) <= 1:
-                self.status = "Idle"
             elif self.temp - self.past_temp > 1:
+                self.past_status = self.status
                 self.status = "Heating"
-            elif self.temp - self.past_temp < -1:
+            elif self.past_temp - self.temp > 1:
+                self.past_status = self.status
                 self.status = "Cooling"
-        self.past_temp = self.temp
+            elif (abs(self.temp - self.past_temp) <= 0.2) & (self.temp<49):
+                self.past_status = self.status
+                self.status = "Idle"
+            self.oldest_temp = self.past_temp
+            self.past_temp = self.temp
         self.timer += 1
 
     def update_colors(self):
@@ -115,18 +146,18 @@ class BatchmakerDisplay(GridLayout,Widget):
 
     def update(self,dt):
         self.msg = ""
-        self.msg=self.ser.read(100)
+        self.msg=self.ser.read(200)
         self.ser.reset_input_buffer()
-        self.f.write("serial: \n")
-        self.f.write(self.msg)
-        self.f.write("\n")
+        # self.f.write("serial: \n")
+        # self.f.write(self.msg)
+        # self.f.write("\n")
         try:
             i=0
             while i <= (len(self.msg) - 4):
                 if self.msg[i] == 'e':
                     if self.msg[i+2] == self.msg[i+5]:
                         self.probenum=int(self.msg[i+2])
-                        self.temperature=float(self.msg[(i+5):(i+11)])
+                        self.temperature=float(self.msg[(i+5):(i+12)])
                         self.temperature = self.temperature - (self.probenum * 10000)
                         #if self.batchtemps[self.probenum-1] == 0 or abs(self.temperature-self.batchtemps[selfprobenum-1]) <= 5:
                         self.batchtemps[self.probenum-1]=self.temperature
@@ -134,13 +165,13 @@ class BatchmakerDisplay(GridLayout,Widget):
                 i=i+1
         except:
             pass
-        self.f.write("batchtemps: \n")
-        self.f.write(str(self.batchtemps))
-        self.f.write("\n")
-        self.f.write("children: \n")
+        # self.f.write("batchtemps: \n")
+        # self.f.write(str(self.batchtemps))
+        # self.f.write("\n")
+        # self.f.write("children: \n")
         for child in self.children:
-            self.f.write(str(self.batchtemps[int(child.probe)-1]))
-            self.f.write("\n")
+            # self.f.write(str(self.batchtemps[int(child.probe)-1]))
+            # self.f.write("\n")
             child.init_temp = self.batchtemps[int(child.probe)-1]
             child.modify_temps()
             child.update_status()
@@ -163,8 +194,8 @@ class BatchmakerDisplay(GridLayout,Widget):
 
     def __init__(self, *args, **kwargs):
         super(BatchmakerDisplay, self).__init__(*args, **kwargs)
-        self.ser = serial.Serial('COM5', baudrate=9600, timeout=0)
-        self.f = open("log.txt", 'w')
+        self.ser = serial.Serial('COM4', baudrate=9600, timeout=0)
+        # self.f = open("log.txt", 'w')
         time.sleep(3)
         Clock.schedule_once(self.update,1)
 #        Clock.schedule_interval(self.update,30)
